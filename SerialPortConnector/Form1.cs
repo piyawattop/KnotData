@@ -42,8 +42,12 @@ namespace SerialPortConnector
         {
             try
             {
-                string receivedData = ComPort.ReadExisting();  //read all available data in the receiving buffer
-                rtxtDataArea.ForeColor = Color.Green;   //write text data in green
+                string receivedData = NormalizeLineBreaks(ComPort.ReadExisting());
+                string debug = receivedData.Replace("\r", "\\r")
+                                         .Replace("\n", "\\n");
+                rttbDebug.AppendText(debug + "\n");
+
+                rtxtDataArea.ForeColor = Color.Green; 
                 rtxtDataArea.AppendText(receivedData + "\n");
             }
             catch (Exception ex)
@@ -51,7 +55,41 @@ namespace SerialPortConnector
                 MessageBox.Show(ex.Message);
             }
         }
+       private string NormalizeLineBreaks(string input)
+        {
+            // Allow 10% as a rough guess of how much the string may grow.
+            // If we're wrong we'll either waste space or have extra copies -
+            // it will still work
+            StringBuilder builder = new StringBuilder((int)(input.Length * 1.1));
 
+            bool lastWasCR = false;
+
+            foreach (char c in input)
+            {
+                if (lastWasCR)
+                {
+                    lastWasCR = false;
+                    if (c == '\n')
+                    {
+                        continue; // Already written \r\n
+                    }
+                }
+                switch (c)
+                {
+                    case '\r':
+                        builder.Append("\r\n");
+                        lastWasCR = true;
+                        break;
+                    case '\n':
+                        builder.Append("\r\n");
+                        break;
+                    default:
+                        builder.Append(c);
+                        break;
+                }
+            }
+            return builder.ToString();
+        }
         private void connect()
         {
             bool error = false;
@@ -190,5 +228,57 @@ namespace SerialPortConnector
             if (ComPort.IsOpen) ComPort.Close();   //close the port if open when existing the application
 
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            var currentSerialPortReceived = "0005 01 03 03 18/12/19 08:24:00  00.008  0251.0                  Rt";
+            var obj = new DataTorque(currentSerialPortReceived);
+        }
+
+    }
+    public class DataTorque
+    {
+        public string originalString { get; set; }
+        public DataTorque(string inputString)
+        {
+            this.originalString = inputString;
+            try
+            {
+                var knotDataArr = inputString.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                if(knotDataArr.Length == 9)
+                {
+                    rgdn = knotDataArr[0];
+                    sp = knotDataArr[1];
+                    cy = knotDataArr[2];
+                    ph = knotDataArr[3];
+                    date = knotDataArr[4];
+                    time = knotDataArr[5];
+                    double doubleDataTemp;
+                    double.TryParse(knotDataArr[6], out doubleDataTemp);
+                    torque = doubleDataTemp;
+                    double.TryParse(knotDataArr[7], out doubleDataTemp);
+                    angle = doubleDataTemp;
+                    standbyChar = knotDataArr[8];
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public string rgdn { get; set; }
+        public string sp { get; set; }
+        public string cy { get; set; }
+        public string ph { get; set; }
+        public string date { get; set; }
+        public string time { get; set; }
+        public double torque{ get; set; }
+        public double angle{ get; set; }
+        public double torqueRate{ get; set; }
+        public string standbyChar { get; set; }
+
+        public int Seq { get; set; }
+        public string Torque { get; set; }
+        public string TorqueAngle { get; set; }
     }
 }

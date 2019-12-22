@@ -26,8 +26,6 @@ namespace KnotBackgroundService.Models
 
         public string TicketALL { get; set; }
 
-        public string DataCycleXML { get; set; }
-
         public int? TicketALLCheckSum { get; set; }
 
     }

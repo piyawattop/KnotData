@@ -36,8 +36,6 @@ namespace KnotBackgroundService.Models
 
         public string SupervisorID { get; set; }
 
-        public string DataStepXML { get; set; }
-
         public int ExecutionOrder { get; set; }
 
         public byte[] DataStepBIN { get; set; }
