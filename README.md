@@ -1,12 +1,17 @@
 # KnotData
 
-Using .NetFW 4.7.2 (https://dotnet.microsoft.com/download/visual-studio-sdks?utm_source=getdotnetsdk&utm_medium=referral)
+### Prerequisites Using .NetFW 4.7.2 
+If you dont have download at https://dotnet.microsoft.com/download/visual-studio-sdks?utm_source=getdotnetsdk&utm_medium=referral
 
+### Enable Database Broker service
+```
 USE Master
 ALTER DATABASE FusionCore SET DISABLE_BROKER;
 Go;
+```
 
---- Create new Database and add new table
+### Create new Database and add new table
+```
 CREATE TABLE DataKnot  
 (  
  DataKnotUID uniqueidentifier NOT NULL DEFAULT newid(),  
@@ -40,4 +45,5 @@ CREATE TABLE DataKnot
  ExportedToFile nvarchar(512),  
  TransDateTime Datetime DEFAULT GETDATE()
 );  
-GO  
+GO
+```
