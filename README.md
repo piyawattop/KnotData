@@ -1,12 +1,25 @@
-# KnotData
+# KnotData Service
 
-Using .NetFW 4.7.2 (https://dotnet.microsoft.com/download/visual-studio-sdks?utm_source=getdotnetsdk&utm_medium=referral)
+### Prerequisites Using .NetFW 4.7.2 
+If you dont have download at https://dotnet.microsoft.com/download/visual-studio-sdks?utm_source=getdotnetsdk&utm_medium=referral
 
+### Enable Database Broker service
+```
 USE Master
+GO;
+
 ALTER DATABASE FusionCore SET DISABLE_BROKER;
 Go;
+```
 
---- Create new Database and add new table
+### Create new Database and add new table
+```
+CREATE DATABASE KnotData
+GO;
+
+USE KnotData
+GO; 
+
 CREATE TABLE DataKnot  
 (  
  DataKnotUID uniqueidentifier NOT NULL DEFAULT newid(),  
@@ -40,4 +53,24 @@ CREATE TABLE DataKnot
  ExportedToFile nvarchar(512),  
  TransDateTime Datetime DEFAULT GETDATE()
 );  
-GO  
+GO
+```
+
+### How to install Service
+1.Open CMD with Administrator right.
+![cmd](https://clssp20.blob.core.windows.net/solconfig/1CMD.png)
+2.Go to release folder and use InstallService.bat
+![install](https://clssp20.blob.core.windows.net/solconfig/2InstallService.png)
+Done...
+
+### Setting in service
+![appsetting](https://clssp20.blob.core.windows.net/solconfig/AppSetting.png)
+1. COMPORT
+2. FusionConnectionString
+3. KnotConnectionString
+4. ExportPath
+5. ExportFileType allow only csv,xls,xlsx
+6. Mode to let service schedule export file allow only Daily and Interval
+7. IntervalMinutes set every xx minute 
+8. ScheduledTime set for every day time ex. 18.30
+
