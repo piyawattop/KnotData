@@ -32,6 +32,7 @@ namespace KnotBackgroundService
         private KnotDataService KnotDataService;
         private ExportService exportService;
         private DataKnot currentKnotData;
+        private string currentBarcodeModelStepUID;
         private int currentSequence;
         private string currentSerialPortReceived;
         private bool isFocusKnotData;
@@ -65,9 +66,9 @@ namespace KnotBackgroundService
                         switch (e.Entity.StepName)
                         {
                             case "BARCODE MODEL":
+                                currentBarcodeModelStepUID = e.Entity.DataStepUID;
                                 currentKnotData = new DataKnot
                                 {
-                                    Barcode = fusionDataService.GetDataStepSubResult(e.Entity.DataStepUID),
                                     CycleID = e.Entity.CycleID,
                                     DataStepUID = e.Entity.DataStepUID,
                                     TransDateTime = DateTime.Now
@@ -112,10 +113,13 @@ namespace KnotBackgroundService
                                 }
                                 else
                                 {
+                                    if(!string.IsNullOrEmpty(currentBarcodeModelStepUID))
+                                        currentKnotData.Barcode = fusionDataService.GetDataStepSubResult(currentBarcodeModelStepUID);
                                     //Insert data to Knot table
                                     KnotDataService.InsertKnotData(currentKnotData);
                                     //reset seq
                                     currentSequence = 0;
+                                    currentBarcodeModelStepUID = "";
                                 }
                                 break;
                             default:
