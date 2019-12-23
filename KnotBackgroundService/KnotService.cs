@@ -77,82 +77,266 @@ namespace KnotBackgroundService
                     case ChangeType.Insert:
                         switch (e.Entity.StepName)
                         {
+                            case "READY ON":
+                                Logger.Info($"Step ==> {e.Entity.StepName} # {e.Entity.CycleID}");
+                                if (currentKnotData == null)
+                                {
+                                    currentKnotData = new DataKnot
+                                    {
+                                        CycleID = e.Entity.CycleID,
+                                        DataStepUID = e.Entity.DataStepUID,
+                                        TransDateTime = DateTime.Now
+                                    };
+                                }
+                                break;
                             case "BARCODE MODEL":
                                 Logger.Info($"Step ==> {e.Entity.StepName} # {JsonConvert.SerializeObject(e.Entity)}");
                                 currentBarcodeModelStepUID = e.Entity.DataStepUID;
-                                currentKnotData = new DataKnot
+                                if (currentKnotData == null)
                                 {
-                                    CycleID = e.Entity.CycleID,
-                                    DataStepUID = e.Entity.DataStepUID,
-                                    TransDateTime = DateTime.Now
-                                };
-                                currentSequence = 1;
-                                break;
-                            case "PY MODEL 1 START":
-                            case "MODEL 1":
-                                Logger.Info($"Step ==> {e.Entity.StepName} # {JsonConvert.SerializeObject(e.Entity)}");
-                                currentKnotData.Model = "MODEL 1";
-                                break;
-                            case "PY MODEL 2 START":
-                            case "MODEL 2":
-                                Logger.Info($"Step ==> {e.Entity.StepName} # {JsonConvert.SerializeObject(e.Entity)}");
-                                currentKnotData.Model = "MODEL 2";
-                                break;
-                            case "PY MODEL 3 START":
-                            case "MODEL 3":
-                                Logger.Info($"Step ==> {e.Entity.StepName} # {JsonConvert.SerializeObject(e.Entity)}");
-                                currentKnotData.Model = "MODEL 3";
-                                break;
-                            case "IAI START PB":
-                                Logger.Info($"Step ==> {e.Entity.StepName} # {JsonConvert.SerializeObject(e.Entity)}");
-                                isFocusKnotData = true;
-                                break;
-                            case "AMBIENT SENSOR CONFIRMED":
-                                Logger.Info($"Step ==> {e.Entity.StepName} # {JsonConvert.SerializeObject(e.Entity)}");
-                                currentKnotData.AmbientSensor = e.Entity.OutcomeType;
-                                break;
-                            case "ADAPATER CORD CONFIRMED":
-                                Logger.Info($"Step ==> {e.Entity.StepName} # {JsonConvert.SerializeObject(e.Entity)}");
-                                currentKnotData.AdaptorCord = e.Entity.OutcomeType;
-                                break;
-                            case "LH FOAM JIG PUSH FWD CONFIRMED":
-                                Logger.Info($"Step ==> {e.Entity.StepName} # {JsonConvert.SerializeObject(e.Entity)}");
-                                currentKnotData.LHFoam = e.Entity.OutcomeType;
-                                break;
-                            case "RH FOAM JIG  DOWN END":
-                                Logger.Info($"Step ==> {e.Entity.StepName} # {JsonConvert.SerializeObject(e.Entity)}");
-                                currentKnotData.RHFoam = e.Entity.OutcomeType;
-                                break;
-                            case "UPPER FOAM JIG BWD CONFIRMED":
-                                Logger.Info($"Step ==> {e.Entity.StepName} # {JsonConvert.SerializeObject(e.Entity)}");
-                                currentKnotData.Upperfoam = e.Entity.OutcomeType;
-                                break;
-                            case "########### JUMP END ###########":
-                                Logger.Info($"Step ==> {e.Entity.StepName} # {JsonConvert.SerializeObject(e.Entity)}");
-                                isFocusKnotData = false;
-                                if (!string.IsNullOrEmpty(currentBarcodeModelStepUID))
-                                    currentKnotData.Barcode = fusionDataService.GetDataStepSubResult(currentBarcodeModelStepUID);
-                                if (string.IsNullOrEmpty(currentKnotData.Barcode))
-                                {
-                                    Logger.Info($"**BARCODE NOT FOUND**");
+                                    currentKnotData = new DataKnot
+                                    {
+                                        CycleID = e.Entity.CycleID,
+                                        DataStepUID = e.Entity.DataStepUID,
+                                        TransDateTime = DateTime.Now
+                                    };
                                 }
                                 else
                                 {
-                                    Logger.Info($"**BARCODE** {currentKnotData.Barcode}");
+                                    currentKnotData.CycleID = e.Entity.CycleID;
+                                    currentKnotData.DataStepUID = e.Entity.DataStepUID;
                                 }
-                                Logger.Error($"TOTAL TORQUE COUNT: {currentSequence - 1}");
-                                if ((currentSequence - 1) != KNOT_COUNT)
+                                currentSequence = 1;
+                                break;
+                            case "JUMP MODEL GC7":
+                                if (e.Entity.CycleID == currentKnotData.CycleID)
                                 {
-                                    Logger.Error($"BARCODE: {currentKnotData.Barcode} | Knot data not complete");
+                                    Logger.Info($"Step ==> {e.Entity.StepName} # {JsonConvert.SerializeObject(e.Entity)}");
+                                    if (currentKnotData == null)
+                                    {
+                                        currentKnotData = new DataKnot
+                                        {
+                                            CycleID = e.Entity.CycleID,
+                                            TransDateTime = DateTime.Now
+                                        };
+                                    }
+                                    currentKnotData.Model = "MODEL GC7";
                                 }
-                                //Insert data to Knot table
-                                KnotDataService.InsertKnotData(currentKnotData);
-                                //reset seq
-                                currentSequence = 0;
-                                currentBarcodeModelStepUID = "";
+                                break;
+                            case "JUMP MODEL HM7":
+                                if (e.Entity.CycleID == currentKnotData.CycleID)
+                                {
+                                    Logger.Info($"Step ==> {e.Entity.StepName} # {JsonConvert.SerializeObject(e.Entity)}");
+                                    if (currentKnotData == null)
+                                    {
+                                        currentKnotData = new DataKnot
+                                        {
+                                            CycleID = e.Entity.CycleID,
+                                            TransDateTime = DateTime.Now
+                                        };
+                                    }
+                                    currentKnotData.Model = "MODEL HM7";
+                                }
+                                break;
+                            case "JUMP MODEL HN6":
+                                if (e.Entity.CycleID == currentKnotData.CycleID)
+                                {
+                                    Logger.Info($"Step ==> {e.Entity.StepName} # {JsonConvert.SerializeObject(e.Entity)}");
+                                    if (currentKnotData == null)
+                                    {
+                                        currentKnotData = new DataKnot
+                                        {
+                                            CycleID = e.Entity.CycleID,
+                                            TransDateTime = DateTime.Now
+                                        };
+                                    }
+                                    currentKnotData.Model = "MODEL HN6";
+                                }
+                                break;
+                            case "IAI START PB":
+                                if (e.Entity.CycleID == currentKnotData.CycleID)
+                                {
+                                    Logger.Info($"Step ==> {e.Entity.StepName} # {JsonConvert.SerializeObject(e.Entity)}");
+                                    isFocusKnotData = true;
+                                }
+                                break;
+                            case "AMBIENT SENSOR CONFIRMED":
+                                if (e.Entity.CycleID == currentKnotData.CycleID)
+                                {
+                                    Logger.Info($"Step ==> {e.Entity.StepName} # {e.Entity.OutcomeType}");
+                                    if (currentKnotData == null)
+                                    {
+                                        currentKnotData = new DataKnot
+                                        {
+                                            TransDateTime = DateTime.Now
+                                        };
+                                    }
+                                    currentKnotData.AmbientSensor = e.Entity.OutcomeType;
+                                }
+                                break;
+                            case "ADAPATER CORD CONFIRMED":
+                                if (e.Entity.CycleID == currentKnotData.CycleID)
+                                {
+                                    Logger.Info($"Step ==> {e.Entity.StepName} # {e.Entity.OutcomeType}");
+                                    if (currentKnotData == null)
+                                    {
+                                        currentKnotData = new DataKnot
+                                        {
+                                            TransDateTime = DateTime.Now
+                                        };
+                                    }
+                                    currentKnotData.AdaptorCord = e.Entity.OutcomeType;
+                                }
+                                break;
+                            case "LH FOAM JIG PUSH FWD CONFIRMED":
+                                if (e.Entity.CycleID == currentKnotData.CycleID)
+                                {
+                                    Logger.Info($"Step ==> {e.Entity.StepName} # {e.Entity.OutcomeType}");
+                                    if (currentKnotData == null)
+                                    {
+                                        currentKnotData = new DataKnot
+                                        {
+                                            TransDateTime = DateTime.Now
+                                        };
+                                    }
+                                    currentKnotData.LHFoam = e.Entity.OutcomeType;
+                                }
+                                break;
+                            case "RH FOAM JIG FWD":
+                                if (e.Entity.CycleID == currentKnotData.CycleID)
+                                {
+                                    Logger.Info($"Step ==> {e.Entity.StepName} # {e.Entity.OutcomeType}");
+                                    if (currentKnotData == null)
+                                    {
+                                        currentKnotData = new DataKnot
+                                        {
+                                            TransDateTime = DateTime.Now
+                                        };
+                                    }
+                                    currentKnotData.RHFoam = e.Entity.OutcomeType;
+                                }
+                                break;
+                            case "UPPER FOAM JIG FWD":
+                                if (e.Entity.CycleID == currentKnotData.CycleID)
+                                {
+                                    Logger.Info($"Step ==> {e.Entity.StepName} # {e.Entity.OutcomeType}");
+                                    if (currentKnotData == null)
+                                    {
+                                        currentKnotData = new DataKnot
+                                        {
+                                            TransDateTime = DateTime.Now
+                                        };
+                                    }
+                                    currentKnotData.Upperfoam = e.Entity.OutcomeType;
+                                }
+                                break;
+                            case "END":
+                                if (e.Entity.CycleID == currentKnotData.CycleID)
+                                {
+                                    Logger.Info($"Step ==> {e.Entity.StepName} # {JsonConvert.SerializeObject(e.Entity)}");
+                                    isFocusKnotData = false;
+                                    GetStepData();
+                                    if (string.IsNullOrEmpty(currentKnotData.Barcode))
+                                    {
+                                        Logger.Info($"**BARCODE NOT FOUND**");
+                                    }
+                                    else
+                                    {
+                                        Logger.Info($"**BARCODE** {currentKnotData.Barcode}");
+                                        Logger.Info($"TOTAL TORQUE COUNT: {currentSequence - 1}");
+                                        if ((currentSequence - 1) != KNOT_COUNT)
+                                        {
+                                            Logger.Error($"BARCODE: {currentKnotData.Barcode} | Knot data not complete");
+                                        }
+                                        //Insert data to Knot table
+                                        Logger.Info($"INSERT BARCODE {currentKnotData.Barcode} # {JsonConvert.SerializeObject(currentKnotData)}");
+                                        KnotDataService.InsertKnotData(currentKnotData);
+                                    }
+                                    //reset seq
+                                    currentKnotData = null;
+                                    currentSequence = 0;
+                                    currentBarcodeModelStepUID = "";
+                                }
                                 break;
                             default:
-                                Logger.Info($"GotStepChange (NotFocus) : {e.Entity.StepName}");
+                                Logger.Debug($"GotStepChange (NotFocus) : {e.Entity.StepName}");
+                                break;
+                        }
+                        break;
+                    case ChangeType.Update:
+                        switch (e.Entity.StepName)
+                        {
+                            case "AMBIENT SENSOR CONFIRMED":
+                                if (e.Entity.CycleID == currentKnotData.CycleID)
+                                {
+                                    Logger.Info($"Step ==> {e.Entity.StepName} # {e.Entity.OutcomeType}");
+                                    if (currentKnotData == null)
+                                    {
+                                        currentKnotData = new DataKnot
+                                        {
+                                            TransDateTime = DateTime.Now
+                                        };
+                                    }
+                                    currentKnotData.AmbientSensor = e.Entity.OutcomeType;
+                                }
+                                break;
+                            case "ADAPATER CORD CONFIRMED":
+                                if (e.Entity.CycleID == currentKnotData.CycleID)
+                                {
+                                    Logger.Info($"Step ==> {e.Entity.StepName} # {e.Entity.OutcomeType}");
+                                    if (currentKnotData == null)
+                                    {
+                                        currentKnotData = new DataKnot
+                                        {
+                                            TransDateTime = DateTime.Now
+                                        };
+                                    }
+                                    currentKnotData.AdaptorCord = e.Entity.OutcomeType;
+                                }
+                                break;
+                            case "LH FOAM JIG PUSH FWD CONFIRMED":
+                                if (e.Entity.CycleID == currentKnotData.CycleID)
+                                {
+                                    Logger.Info($"Step ==> {e.Entity.StepName} # {e.Entity.OutcomeType}");
+                                    if (currentKnotData == null)
+                                    {
+                                        currentKnotData = new DataKnot
+                                        {
+                                            TransDateTime = DateTime.Now
+                                        };
+                                    }
+                                    currentKnotData.LHFoam = e.Entity.OutcomeType;
+                                }
+                                break;
+                            case "RH FOAM JIG FWD":
+                                if (e.Entity.CycleID == currentKnotData.CycleID)
+                                {
+                                    Logger.Info($"Step ==> {e.Entity.StepName} # {e.Entity.OutcomeType}");
+                                    if (currentKnotData == null)
+                                    {
+                                        currentKnotData = new DataKnot
+                                        {
+                                            TransDateTime = DateTime.Now
+                                        };
+                                    }
+                                    currentKnotData.RHFoam = e.Entity.OutcomeType;
+                                }
+                                break;
+                            case "UPPER FOAM JIG FWD":
+                                if (e.Entity.CycleID == currentKnotData.CycleID)
+                                {
+                                    Logger.Info($"Step ==> {e.Entity.StepName} # {e.Entity.OutcomeType}");
+                                    if (currentKnotData == null)
+                                    {
+                                        currentKnotData = new DataKnot
+                                        {
+                                            TransDateTime = DateTime.Now
+                                        };
+                                    }
+                                    currentKnotData.Upperfoam = e.Entity.OutcomeType;
+                                }
+                                break;
+                            default:
                                 break;
                         }
                         break;
@@ -160,6 +344,48 @@ namespace KnotBackgroundService
             }
         }
 
+        private void GetStepData()
+        {
+            if (!string.IsNullOrEmpty(currentBarcodeModelStepUID))
+            {
+                currentKnotData.Barcode = fusionDataService.GetDataStepSubResult(currentBarcodeModelStepUID);
+                Logger.Info($"GetBarcode({currentBarcodeModelStepUID}) from DB: {currentKnotData.Barcode}");
+            }
+
+            if (string.IsNullOrEmpty(currentKnotData.Model))
+            {
+                currentKnotData.Model = fusionDataService.GetModel(currentKnotData.CycleID);
+                Logger.Info($"GetModel from DB: {currentKnotData.Model}");
+            }
+
+
+            if (currentKnotData.AdaptorCord == "None" || string.IsNullOrEmpty(currentKnotData.AdaptorCord))
+            {
+                currentKnotData.AdaptorCord = fusionDataService.GetStepOutComeType(currentKnotData.CycleID, "ADAPATER CORD CONFIRMED");
+                Logger.Info($"Get AdaptorCord from DB: {currentKnotData.AdaptorCord}");
+            }
+            if (currentKnotData.AmbientSensor == "None" || string.IsNullOrEmpty(currentKnotData.AmbientSensor))
+            {
+                currentKnotData.AmbientSensor = fusionDataService.GetStepOutComeType(currentKnotData.CycleID, "AMBIENT SENSOR CONFIRMED");
+                Logger.Info($"Get AmbientSensor from DB: {currentKnotData.AmbientSensor}");
+            }
+            if (currentKnotData.LHFoam == "None" || string.IsNullOrEmpty(currentKnotData.AmbientSensor))
+            {
+                currentKnotData.LHFoam = fusionDataService.GetStepOutComeType(currentKnotData.CycleID, "LH FOAM JIG PUSH FWD CONFIRMED");
+                Logger.Info($"Get LHFoam from DB: {currentKnotData.LHFoam}");
+            }
+            if (currentKnotData.RHFoam == "None" || string.IsNullOrEmpty(currentKnotData.RHFoam))
+            {
+                currentKnotData.RHFoam = fusionDataService.GetStepOutComeType(currentKnotData.CycleID, "RH FOAM JIG FWD");
+                Logger.Info($"Get AmbientSensor from DB: {currentKnotData.RHFoam}");
+            }
+            if (currentKnotData.Upperfoam == "None" || string.IsNullOrEmpty(currentKnotData.Upperfoam))
+            {
+                currentKnotData.Upperfoam = fusionDataService.GetStepOutComeType(currentKnotData.CycleID, "UPPER FOAM JIG FWD");
+                Logger.Info($"Get AmbientSensor from DB: {currentKnotData.Upperfoam}");
+            }
+          
+        }
         private void _dependency_OnError(object sender, TableDependency.SqlClient.Base.EventArgs.ErrorEventArgs e)
         {
             Logger.Error(e.Error, "_dependency_OnError");
@@ -214,28 +440,35 @@ namespace KnotBackgroundService
         protected override void OnStart(string[] args)
         {
             Logger.Info("onStart");
-            string[] ports = SerialPort.GetPortNames();
-            if (ports.Contains(_COMPORT))
+            if (!string.IsNullOrWhiteSpace(_COMPORT))
             {
-                ComPort.PortName = _COMPORT;
-                ComPort.BaudRate = 9800;
-                ComPort.Parity = Parity.None;
-                ComPort.DataBits = 8;
-                ComPort.StopBits = StopBits.One;
-                try
+                string[] ports = SerialPort.GetPortNames();
+                if (ports.Contains(_COMPORT))
                 {
-                    //Open Port
-                    ComPort.Open();
-                    Logger.Info("comport connected");
+                    ComPort.PortName = _COMPORT;
+                    ComPort.BaudRate = 9800;
+                    ComPort.Parity = Parity.None;
+                    ComPort.DataBits = 8;
+                    ComPort.StopBits = StopBits.One;
+                    try
+                    {
+                        //Open Port
+                        ComPort.Open();
+                        Logger.Info("comport connected");
+                    }
+                    catch (UnauthorizedAccessException e) { Logger.Error(e); }
+                    catch (System.IO.IOException e) { Logger.Error(e); }
+                    catch (ArgumentException e) { Logger.Error(e); }
                 }
-                catch (UnauthorizedAccessException e) { Logger.Error(e); }
-                catch (System.IO.IOException e) { Logger.Error(e); }
-                catch (ArgumentException e) { Logger.Error(e); }
+                else
+                {
+                    Logger.Error($"Comport {_COMPORT} invalid please change setting");
+                    throw new Exception($"Comport {_COMPORT} invalid please change setting");
+                }
             }
             else
             {
-                Logger.Error($"Comport {_COMPORT} invalid please change setting");
-                throw new Exception($"Comport {_COMPORT} invalid please change setting");
+                Logger.Error($"Comport {_COMPORT} not set");
             }
             exportService.SetScheduler();
         }

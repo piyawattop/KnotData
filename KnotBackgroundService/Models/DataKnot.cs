@@ -13,11 +13,11 @@ namespace KnotBackgroundService.Models
         public DataKnot()
         {
             TransDateTime = DateTime.Now;
-            AmbientSensor = "Skip";
-            Upperfoam = "Skip";
-            LHFoam = "Skip";
-            RHFoam = "Skip";
-            AdaptorCord = "Skip";
+            AmbientSensor = "None";
+            Upperfoam = "None";
+            LHFoam = "None";
+            RHFoam = "None";
+            AdaptorCord = "None";
         }
 
         [Description("Date")]

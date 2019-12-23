@@ -77,6 +77,7 @@ namespace IDEReport.Services
                 {
                     sql += " AND Model = @model ";
                 }
+                sql += " ORDER BY TransDateTime";
                 result = conn.Query<DataKnotViewModel>(sql, new { dateStart, dateEnd, barcode, model }).ToList();
                 return result;
             }
