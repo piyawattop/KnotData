@@ -38,21 +38,34 @@ namespace KnotBackgroundService
         private bool isFocusKnotData;
         public KnotService()
         {
+            Logger.Debug("Init Service");
             InitializeComponent();
-            ComPort.DataReceived += new SerialDataReceivedEventHandler(onComport_DataReceived);
-            var mapper = new ModelToTableMapper<DataStep>();
-            mapper.AddMapping(model => model.DataStepUID, "DataStepUID");
-            mapper.AddMapping(model => model.StepName, "StepName");
-            _dependency = new SqlTableDependency<DataStep>(_fusionConnectionString,
-                                                           "DataStep",
-                                                           mapper: mapper);
-            _dependency.OnChanged += _dependency_OnChanged;
-            _dependency.OnError += _dependency_OnError;
-            _dependency.Start();
-            isFocusKnotData = false;
-            fusionDataService = new FusionDataService(_fusionConnectionString);
-            KnotDataService = new KnotDataService(_knotConnectionString);
-            exportService = new ExportService();
+            try
+            {
+                ComPort.DataReceived += new SerialDataReceivedEventHandler(onComport_DataReceived);
+                var mapper = new ModelToTableMapper<DataStep>();
+                mapper.AddMapping(model => model.DataStepUID, "DataStepUID");
+                mapper.AddMapping(model => model.StepName, "StepName");
+                _dependency = new SqlTableDependency<DataStep>(_fusionConnectionString,
+                                                               "DataStep",
+                                                               mapper: mapper);
+                _dependency.OnChanged += _dependency_OnChanged;
+                _dependency.OnError += _dependency_OnError;
+                _dependency.Start();
+                isFocusKnotData = false;
+                fusionDataService = new FusionDataService(_fusionConnectionString);
+                KnotDataService = new KnotDataService(_knotConnectionString);
+                exportService = new ExportService();
+                Logger.Debug("Init Completed");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex , "Init KnotService");
+                Logger.Info(ex.Message);
+                Logger.Info(ex.StackTrace);
+                throw;
+            }
+            
         }
 
         private void _dependency_OnChanged(object sender, RecordChangedEventArgs<DataStep> e)
@@ -185,7 +198,7 @@ namespace KnotBackgroundService
         {
             Logger.Info("onStart");
             string[] ports = SerialPort.GetPortNames();
-            if (ports.Contains("_COMPORT"))
+            if (ports.Contains(_COMPORT))
             {
                 ComPort.PortName = _COMPORT;
                 ComPort.BaudRate = 9800;
