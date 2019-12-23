@@ -40,7 +40,7 @@
             // serviceInstaller1
             // 
             this.serviceInstaller1.Description = "Service background to get reailtime data from Pivot and KnotRunner";
-            this.serviceInstaller1.ServiceName = "KnotDataService";
+            this.serviceInstaller1.ServiceName = "IDEService";
             this.serviceInstaller1.StartType = System.ServiceProcess.ServiceStartMode.Automatic;
             // 
             // ProjectInstaller
