@@ -89,7 +89,7 @@ namespace KnotBackgroundService.Services
             {
                 try
                 {
-                    if (_exportFileType.Equals("excel"))
+                    if (_exportFileType.Equals("xls") || _exportFileType.Equals("xlsx"))
                     {
                         //create a new ExcelPackage
                         using (ExcelPackage excelPackage = new ExcelPackage())

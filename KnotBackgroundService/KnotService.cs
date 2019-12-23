@@ -113,7 +113,7 @@ namespace KnotBackgroundService
                                 }
                                 else
                                 {
-                                    if(!string.IsNullOrEmpty(currentBarcodeModelStepUID))
+                                    if (!string.IsNullOrEmpty(currentBarcodeModelStepUID))
                                         currentKnotData.Barcode = fusionDataService.GetDataStepSubResult(currentBarcodeModelStepUID);
                                     //Insert data to Knot table
                                     KnotDataService.InsertKnotData(currentKnotData);
@@ -184,29 +184,29 @@ namespace KnotBackgroundService
         protected override void OnStart(string[] args)
         {
             Logger.Info("onStart");
-            //string[] ports = SerialPort.GetPortNames();
-            //if (ports.Contains("_COMPORT"))
-            //{
-            //    ComPort.PortName = _COMPORT;
-            //    ComPort.BaudRate = 9800;
-            //    ComPort.Parity = Parity.None;
-            //    ComPort.DataBits = 8;
-            //    ComPort.StopBits = StopBits.One;
-            //    try
-            //    {
-            //        //Open Port
-            //        ComPort.Open();
-            //        Logger.Info("comport connected");
-            //    }
-            //    catch (UnauthorizedAccessException e) { Logger.Error(e); }
-            //    catch (System.IO.IOException e) { Logger.Error(e); }
-            //    catch (ArgumentException e) { Logger.Error(e); }
-            //}
-            //else
-            //{
-            //    Logger.Error($"Comport {_COMPORT} invalid please change setting");
-            //    throw new Exception($"Comport {_COMPORT} invalid please change setting");
-            //}
+            string[] ports = SerialPort.GetPortNames();
+            if (ports.Contains("_COMPORT"))
+            {
+                ComPort.PortName = _COMPORT;
+                ComPort.BaudRate = 9800;
+                ComPort.Parity = Parity.None;
+                ComPort.DataBits = 8;
+                ComPort.StopBits = StopBits.One;
+                try
+                {
+                    //Open Port
+                    ComPort.Open();
+                    Logger.Info("comport connected");
+                }
+                catch (UnauthorizedAccessException e) { Logger.Error(e); }
+                catch (System.IO.IOException e) { Logger.Error(e); }
+                catch (ArgumentException e) { Logger.Error(e); }
+            }
+            else
+            {
+                Logger.Error($"Comport {_COMPORT} invalid please change setting");
+                throw new Exception($"Comport {_COMPORT} invalid please change setting");
+            }
             exportService.SetScheduler();
         }
 
