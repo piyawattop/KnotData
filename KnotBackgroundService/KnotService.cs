@@ -60,25 +60,25 @@ namespace KnotBackgroundService
             }
             catch (Exception ex)
             {
-                Logger.Error(ex , "Init KnotService");
+                Logger.Error(ex, "Init KnotService");
                 Logger.Info(ex.Message);
                 Logger.Info(ex.StackTrace);
                 throw;
             }
-            
+
         }
 
         private void _dependency_OnChanged(object sender, RecordChangedEventArgs<DataStep> e)
         {
             if (e.ChangeType != ChangeType.None)
             {
-                Logger.Debug(JsonConvert.SerializeObject(e.Entity));
                 switch (e.ChangeType)
                 {
                     case ChangeType.Insert:
                         switch (e.Entity.StepName)
                         {
                             case "BARCODE MODEL":
+                                Logger.Info($"Step ==> {e.Entity.StepName} # {JsonConvert.SerializeObject(e.Entity)}");
                                 currentBarcodeModelStepUID = e.Entity.DataStepUID;
                                 currentKnotData = new DataKnot
                                 {
@@ -90,53 +90,69 @@ namespace KnotBackgroundService
                                 break;
                             case "PY MODEL 1 START":
                             case "MODEL 1":
+                                Logger.Info($"Step ==> {e.Entity.StepName} # {JsonConvert.SerializeObject(e.Entity)}");
                                 currentKnotData.Model = "MODEL 1";
                                 break;
                             case "PY MODEL 2 START":
                             case "MODEL 2":
+                                Logger.Info($"Step ==> {e.Entity.StepName} # {JsonConvert.SerializeObject(e.Entity)}");
                                 currentKnotData.Model = "MODEL 2";
                                 break;
                             case "PY MODEL 3 START":
                             case "MODEL 3":
+                                Logger.Info($"Step ==> {e.Entity.StepName} # {JsonConvert.SerializeObject(e.Entity)}");
                                 currentKnotData.Model = "MODEL 3";
                                 break;
                             case "IAI START PB":
+                                Logger.Info($"Step ==> {e.Entity.StepName} # {JsonConvert.SerializeObject(e.Entity)}");
                                 isFocusKnotData = true;
                                 break;
                             case "AMBIENT SENSOR CONFIRMED":
+                                Logger.Info($"Step ==> {e.Entity.StepName} # {JsonConvert.SerializeObject(e.Entity)}");
                                 currentKnotData.AmbientSensor = e.Entity.OutcomeType;
                                 break;
                             case "ADAPATER CORD CONFIRMED":
+                                Logger.Info($"Step ==> {e.Entity.StepName} # {JsonConvert.SerializeObject(e.Entity)}");
                                 currentKnotData.AdaptorCord = e.Entity.OutcomeType;
                                 break;
                             case "LH FOAM JIG PUSH FWD CONFIRMED":
+                                Logger.Info($"Step ==> {e.Entity.StepName} # {JsonConvert.SerializeObject(e.Entity)}");
                                 currentKnotData.LHFoam = e.Entity.OutcomeType;
                                 break;
                             case "RH FOAM JIG  DOWN END":
+                                Logger.Info($"Step ==> {e.Entity.StepName} # {JsonConvert.SerializeObject(e.Entity)}");
                                 currentKnotData.RHFoam = e.Entity.OutcomeType;
                                 break;
                             case "UPPER FOAM JIG BWD CONFIRMED":
+                                Logger.Info($"Step ==> {e.Entity.StepName} # {JsonConvert.SerializeObject(e.Entity)}");
                                 currentKnotData.Upperfoam = e.Entity.OutcomeType;
                                 break;
-                            case "WAITING IAI":
+                            case "########### JUMP END ###########":
+                                Logger.Info($"Step ==> {e.Entity.StepName} # {JsonConvert.SerializeObject(e.Entity)}");
                                 isFocusKnotData = false;
-                                if (currentSequence != KNOT_COUNT)
+                                if (!string.IsNullOrEmpty(currentBarcodeModelStepUID))
+                                    currentKnotData.Barcode = fusionDataService.GetDataStepSubResult(currentBarcodeModelStepUID);
+                                if (string.IsNullOrEmpty(currentKnotData.Barcode))
                                 {
-                                    Logger.Error($"BARCODE: {currentKnotData.Barcode} | Knot data not complete");
+                                    Logger.Info($"**BARCODE NOT FOUND**");
                                 }
                                 else
                                 {
-                                    if (!string.IsNullOrEmpty(currentBarcodeModelStepUID))
-                                        currentKnotData.Barcode = fusionDataService.GetDataStepSubResult(currentBarcodeModelStepUID);
-                                    //Insert data to Knot table
-                                    KnotDataService.InsertKnotData(currentKnotData);
-                                    //reset seq
-                                    currentSequence = 0;
-                                    currentBarcodeModelStepUID = "";
+                                    Logger.Info($"**BARCODE** {currentKnotData.Barcode}");
                                 }
+                                Logger.Error($"TOTAL TORQUE COUNT: {currentSequence - 1}");
+                                if ((currentSequence - 1) != KNOT_COUNT)
+                                {
+                                    Logger.Error($"BARCODE: {currentKnotData.Barcode} | Knot data not complete");
+                                }
+                                //Insert data to Knot table
+                                KnotDataService.InsertKnotData(currentKnotData);
+                                //reset seq
+                                currentSequence = 0;
+                                currentBarcodeModelStepUID = "";
                                 break;
                             default:
-                                Logger.Debug($"GotStepChange (NotFocus) : {e.Entity.StepName}");
+                                Logger.Info($"GotStepChange (NotFocus) : {e.Entity.StepName}");
                                 break;
                         }
                         break;
@@ -156,11 +172,12 @@ namespace KnotBackgroundService
                 try
                 {
                     string receivedData = ComPort.ReadExisting();
-                    Logger.Debug(receivedData);
-                    Logger.Debug(NormalizeLineBreaks(receivedData));
+                    Logger.Debug($"ORIGINAL # ==> {receivedData}");
                     currentSerialPortReceived += NormalizeLineBreaks(receivedData);
+                    Logger.Debug($"RESULT # ==> {currentSerialPortReceived}");
                     if (currentSerialPortReceived.Contains(START) && currentSerialPortReceived.Contains(END))
                     {
+                        Logger.Info($"TOTAL TORQUE # ==> {currentSerialPortReceived}");
                         currentKnotData.SetTorque(currentSequence, currentSerialPortReceived);
                         currentSequence++;
                         currentSerialPortReceived = string.Empty;

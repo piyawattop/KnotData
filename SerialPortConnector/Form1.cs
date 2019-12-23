@@ -231,7 +231,9 @@ namespace SerialPortConnector
 
         private void button1_Click(object sender, EventArgs e)
         {
-            var currentSerialPortReceived = "0005 01 03 03 18/12/19 08:24:00  00.008  0251.0                  Rt";
+
+            
+            var currentSerialPortReceived = "#START#0093 01 01 03 23/12/19 17:30:14  00.055  0250.7                  Rt #END#";
             var obj = new DataTorque(currentSerialPortReceived);
         }
 

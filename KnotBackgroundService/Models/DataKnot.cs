@@ -81,7 +81,7 @@ namespace KnotBackgroundService.Models
         {
             var knotDataArr = inputString.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
             double doubleDataTemp;
-            if (knotDataArr.Length == 9)
+            if (knotDataArr.Length == 10)
             {
                 switch (seq)
                 {
