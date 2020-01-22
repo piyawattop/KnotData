@@ -42,7 +42,7 @@ namespace SerialPortConnector
         {
             try
             {
-                string receivedData = NormalizeLineBreaks(ComPort.ReadExisting());
+                string receivedData = NormalizeLineBreaks(ComPort.ReadLine());
                 string debug = receivedData.Replace("\r", "\\r")
                                          .Replace("\n", "\\n");
                 rttbDebug.AppendText(debug + "\n");

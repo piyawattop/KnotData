@@ -67,7 +67,7 @@ namespace KnotBackgroundService.Services
                 TimeSpan timeSpan = scheduledTime.Subtract(DateTime.Now);
                 string schedule = string.Format("{0} day(s) {1} hour(s) {2} minute(s) {3} seconds(s)", timeSpan.Days, timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds);
 
-                Logger.Debug($"Export scheduled to run after: {schedule}");
+                Logger.Info($"Export scheduled to run after: {schedule}");
 
                 //Get the difference in Minutes between the Scheduled and Current Time.
                 int dueTime = Convert.ToInt32(timeSpan.TotalMilliseconds);

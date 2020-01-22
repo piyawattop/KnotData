@@ -7,6 +7,7 @@ using System.IO.Ports;
 using System.Linq;
 using System.ServiceProcess;
 using System.Text;
+using System.Timers;
 using TableDependency.SqlClient;
 using TableDependency.SqlClient.Base;
 using TableDependency.SqlClient.Base.Enums;
@@ -36,13 +37,15 @@ namespace KnotBackgroundService
         private int currentSequence;
         private string currentSerialPortReceived;
         private bool isFocusKnotData;
+        private bool isStartCompleted;
+        private Timer timer;
         public KnotService()
         {
-            Logger.Debug("Init Service");
+            Logger.Info("onInit Service");
             InitializeComponent();
+            isStartCompleted = false;
             try
             {
-                ComPort.DataReceived += new SerialDataReceivedEventHandler(onComport_DataReceived);
                 var mapper = new ModelToTableMapper<DataStep>();
                 mapper.AddMapping(model => model.DataStepUID, "DataStepUID");
                 mapper.AddMapping(model => model.StepName, "StepName");
@@ -52,17 +55,14 @@ namespace KnotBackgroundService
                 _dependency.OnChanged += _dependency_OnChanged;
                 _dependency.OnError += _dependency_OnError;
                 _dependency.Start();
-                isFocusKnotData = false;
-                fusionDataService = new FusionDataService(_fusionConnectionString);
-                KnotDataService = new KnotDataService(_knotConnectionString);
-                exportService = new ExportService();
-                Logger.Debug("Init Completed");
+                
+                Logger.Info("onInit Completed");
             }
             catch (Exception ex)
             {
                 Logger.Error(ex, "Init KnotService");
-                Logger.Info(ex.Message);
-                Logger.Info(ex.StackTrace);
+                Logger.Error(ex.Message);
+                Logger.Error(ex.StackTrace);
                 throw;
             }
 
@@ -384,7 +384,7 @@ namespace KnotBackgroundService
                 currentKnotData.Upperfoam = fusionDataService.GetStepOutComeType(currentKnotData.CycleID, "UPPER FOAM JIG FWD");
                 Logger.Info($"Get AmbientSensor from DB: {currentKnotData.Upperfoam}");
             }
-          
+
         }
         private void _dependency_OnError(object sender, TableDependency.SqlClient.Base.EventArgs.ErrorEventArgs e)
         {
@@ -397,7 +397,7 @@ namespace KnotBackgroundService
             {
                 try
                 {
-                    string receivedData = ComPort.ReadExisting();
+                    string receivedData = ComPort.ReadLine();
                     Logger.Debug($"ORIGINAL # ==> {receivedData}");
                     currentSerialPortReceived += NormalizeLineBreaks(receivedData);
                     Logger.Debug($"RESULT # ==> {currentSerialPortReceived}");
@@ -440,6 +440,50 @@ namespace KnotBackgroundService
         protected override void OnStart(string[] args)
         {
             Logger.Info("onStart");
+
+            try
+            {
+                isFocusKnotData = false;
+                fusionDataService = new FusionDataService(_fusionConnectionString);
+                KnotDataService = new KnotDataService(_knotConnectionString);
+                exportService = new ExportService();
+                ComPort.DataReceived += new SerialDataReceivedEventHandler(onComport_DataReceived);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, "onStart KnotService");
+                Logger.Error(ex.Message);
+                Logger.Error(ex.StackTrace);
+                throw;
+            }
+            timer = new Timer();
+            timer.Interval = 10000; // 60 seconds
+            timer.Elapsed += new ElapsedEventHandler(this.OnTimer);
+            timer.Start();
+        }
+
+        private void OnTimer(object sender, ElapsedEventArgs e)
+        {
+            if (!isStartCompleted)
+            {
+                Logger.Info("onTimer");
+                try
+                {
+                    ConnectComport();
+                    exportService.SetScheduler();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex, "onTimer");
+                    Logger.Error(ex.Message);
+                    Logger.Error(ex.StackTrace);
+                }
+            }
+        }
+        private void ConnectComport()
+        {
+            bool retryConnect = true;
+            int retryCount = 0;
             if (!string.IsNullOrWhiteSpace(_COMPORT))
             {
                 string[] ports = SerialPort.GetPortNames();
@@ -450,15 +494,27 @@ namespace KnotBackgroundService
                     ComPort.Parity = Parity.None;
                     ComPort.DataBits = 8;
                     ComPort.StopBits = StopBits.One;
-                    try
+                    while (retryConnect)
                     {
-                        //Open Port
-                        ComPort.Open();
-                        Logger.Info("comport connected");
+                        try
+                        {
+                            //Open Port
+                            ComPort.Open();
+                            retryConnect = false;
+                            Logger.Info("comport connected");
+                            isStartCompleted = true;
+                            timer.Stop();
+                        }
+                        catch (UnauthorizedAccessException ex) { Logger.Error(ex); System.Threading.Thread.Sleep(2000); }
+                        catch (System.IO.IOException ex) { Logger.Error(ex); System.Threading.Thread.Sleep(2000); }
+                        catch (ArgumentException ex) { Logger.Error(ex); System.Threading.Thread.Sleep(2000); }
+                        retryCount++;
+                        if (retryCount > 10)
+                        {
+                            Logger.Error($"Cannot connect to comport {_COMPORT} please check cable or setting file");
+                            throw new Exception($"Cannot connect to comport {_COMPORT} please check cable or setting file");
+                        }
                     }
-                    catch (UnauthorizedAccessException e) { Logger.Error(e); }
-                    catch (System.IO.IOException e) { Logger.Error(e); }
-                    catch (ArgumentException e) { Logger.Error(e); }
                 }
                 else
                 {
@@ -470,9 +526,7 @@ namespace KnotBackgroundService
             {
                 Logger.Error($"Comport {_COMPORT} not set");
             }
-            exportService.SetScheduler();
         }
-
         protected override void OnStop()
         {
             Logger.Info("onStop");
