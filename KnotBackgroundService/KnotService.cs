@@ -397,7 +397,7 @@ namespace KnotBackgroundService
             {
                 try
                 {
-                    string receivedData = ComPort.ReadLine();
+                    string receivedData = ComPort.ReadExisting();
                     Logger.Debug($"ORIGINAL # ==> {receivedData}");
                     currentSerialPortReceived += NormalizeLineBreaks(receivedData);
                     Logger.Debug($"RESULT # ==> {currentSerialPortReceived}");
